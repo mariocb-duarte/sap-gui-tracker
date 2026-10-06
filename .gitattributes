@@ -1,0 +1,5 @@
+# HTA e VBScript precisam de CRLF.
+# Gravador.vbs fica em Windows-1252 na pasta local (exigência do Windows Script Host)
+# e em UTF-8 no repositório, para o GitHub exibir os acentos corretamente.
+*.hta text eol=crlf
+*.vbs text eol=crlf working-tree-encoding=CP1252

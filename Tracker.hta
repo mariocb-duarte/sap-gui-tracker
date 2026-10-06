@@ -1,0 +1,747 @@
+﻿<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=9">
+<title>Mini Tracker SAP</title>
+<HTA:APPLICATION ID="MiniTracker" APPLICATIONNAME="MiniTracker" BORDER="thick" CAPTION="no" SYSMENU="no" SCROLL="no" SINGLEINSTANCE="yes" WINDOWSTATE="normal" ICON="">
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 13px; margin: 0; background: #eef1f5; color: #1d2733; overflow: hidden; }
+  button, select, input, textarea { font-family: "Segoe UI", Arial, sans-serif; font-size: 0.92em; }
+
+  /* Cabeçalho */
+  #header { position: absolute; top: 0; left: 0; right: 0; background: #16324f; color: #fff; padding: 6px 0 6px 12px; cursor: default; }
+  #wc { float: right; white-space: nowrap; margin-top: -6px; }
+  #wc button { border: 0; background: transparent; color: #fff; width: 3.6em; height: 2.6em; cursor: pointer; vertical-align: top; }
+  #wc button:hover { background: #2a4a6e; }
+  #wc button.ico { font-family: "Segoe MDL2 Assets", "Segoe UI Symbol", sans-serif; font-size: 0.8em; width: 4.6em; height: 3.2em; }
+  #wc button.cls:hover { background: #c42b1c; }
+  #brand { font-size: 1.15em; font-weight: 600; margin-right: 14px; white-space: nowrap; }
+  #brand small { font-weight: 400; color: #9fb7d0; font-size: 0.85em; margin-left: 4px; }
+  .grp { display: inline-block; margin: 3px 10px 3px 0; white-space: nowrap; vertical-align: middle; }
+  .grp label { color: #b9cbe0; font-size: 0.85em; margin-right: 4px; }
+  #selSes { width: 340px; padding: 3px; border: 1px solid #2f557d; border-radius: 3px; }
+  #txtFilter { width: 170px; padding: 4px 6px; border: 1px solid #2f557d; border-radius: 3px; }
+
+  .btn { padding: 4px 11px; border: 1px solid #c4ced9; border-radius: 3px; background: #fff; color: #1d2733; cursor: pointer; }
+  .btn:hover { background: #e8eef5; }
+  .btn-pri { background: #2e7dd7; border-color: #2e7dd7; color: #fff; }
+  .btn-pri:hover { background: #2369ba; }
+  .btn-sm { padding: 1px 8px; font-size: 0.85em; }
+
+  /* Painéis */
+  #main { position: absolute; left: 0; right: 0; bottom: 26px; top: 50px; }
+  #left { position: absolute; top: 10px; left: 10px; bottom: 10px; width: 48%; }
+  #right { position: absolute; top: 10px; right: 10px; bottom: 10px; left: 48%; margin-left: 20px; overflow: auto; }
+  .panel { background: #fff; border: 1px solid #d7dee6; border-radius: 5px; }
+  #left .panel { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+  .ph { padding: 7px 10px; border-bottom: 1px solid #e3e8ee; font-weight: 600; font-size: 0.92em; color: #3d4f63; background: #f8fafc; border-radius: 5px 5px 0 0; }
+  .ph .cnt { font-weight: 400; color: #8393a5; margin-left: 6px; }
+  .ph .right { float: right; }
+  #tree { position: absolute; top: 33px; bottom: 0; left: 0; right: 0; overflow: auto; padding: 6px 4px; }
+  #right .panel { margin-bottom: 10px; }
+  .pb { padding: 8px 10px; }
+
+  /* Árvore de elementos */
+  ul { list-style: none; margin: 0; padding-left: 16px; }
+  #tree > ul { padding-left: 2px; }
+  li { margin: 0; padding: 0; white-space: nowrap; }
+  .tg { display: inline-block; width: 14px; color: #8393a5; cursor: pointer; text-align: center; font-size: 0.77em; }
+  .n { cursor: pointer; padding: 1px 5px; border-radius: 3px; }
+  .n:hover { background: #e8f0fb; }
+  .sel, .sel:hover { background: #ffe9a6; }
+  .nm { color: #1d2733; }
+  .tx { color: #7a8796; font-style: italic; }
+  .b { display: inline-block; font-size: 0.77em; padding: 0 5px; border-radius: 8px; margin-right: 4px; font-weight: 600; }
+  .b-in { background: #dcebff; color: #1d5fae; }
+  .b-act { background: #daf3e2; color: #1e7a3e; }
+  .b-shell { background: #ece1fb; color: #6936a8; }
+  .b-win { background: #e4e8ee; color: #3d4f63; }
+  .b-lbl { background: #f3f4f6; color: #6b7785; }
+  .b-oth { background: #fdf0dc; color: #94600f; }
+
+  /* Propriedades */
+  table.kv { border-collapse: collapse; width: 100%; }
+  table.kv td { border-bottom: 1px solid #eef1f5; padding: 4px 6px; vertical-align: top; word-wrap: break-word; }
+  table.kv td.k { width: 105px; color: #6b7785; font-size: 0.92em; }
+  table.kv td.v { font-family: Consolas, monospace; font-size: 0.92em; }
+  table.kv tr:last-child td { border-bottom: 0; }
+
+  textarea.code { width: 100%; height: 7.5em; font-family: Consolas, monospace; font-size: 0.92em; border: 1px solid #d7dee6; border-radius: 3px; padding: 6px; background: #fafbfc; color: #1d2733; resize: vertical; }
+  .lang { font-size: 0.85em; color: #6b7785; font-weight: 600; margin: 6px 0 3px; }
+  .lang button { margin-left: 6px; }
+
+  /* Nós de GuiTree */
+  table.nodes { border-collapse: collapse; width: 100%; }
+  table.nodes td { border-bottom: 1px solid #eef1f5; padding: 3px 6px; white-space: nowrap; }
+  table.nodes td.key { font-family: Consolas, monospace; color: #6b7785; white-space: pre; }
+  .hint { color: #8393a5; font-size: 0.92em; }
+  #loading { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 5; background: #fff; background: rgba(255,255,255,0.92); text-align: center; padding-top: 18%; border-radius: 5px; }
+  .ltitle { font-weight: 600; color: #3d4f63; }
+  .pbar { width: 60%; height: 8px; margin: 12px auto 8px; background: #e3e8ee; border-radius: 4px; overflow: hidden; }
+  .pfill { width: 0; height: 100%; background: #2e7dd7; border-radius: 4px; }
+  .ptext { color: #6b7785; font-size: 0.92em; margin-bottom: 12px; }
+  .btn[disabled], .btn[disabled]:hover { background: #f0f2f5; color: #9aa6b2; border-color: #d7dee6; cursor: default; }
+  .btn-pri[disabled], .btn-pri[disabled]:hover { background: #7fa9d9; color: #e8f0fb; border-color: #7fa9d9; }
+  select[disabled], input[disabled] { background: #e8ecf1; color: #8393a5; }
+  .empty { color: #8393a5; padding: 30px 16px; text-align: center; line-height: 1.6; }
+
+  #status { position: absolute; left: 0; right: 0; bottom: 0; height: 2em; line-height: 2em; padding: 0 12px; background: #dfe5ec; color: #3d4f63; font-size: 0.92em; border-top: 1px solid #cfd7e0; white-space: nowrap; overflow: hidden; }
+  #status.err { background: #fbe1e1; color: #a12b2b; }
+  #status.ok { background: #dcf2e3; color: #1e6b38; }
+</style>
+
+<script language="VBScript">
+Option Explicit
+Dim gApp, gSession, gLastVisual, gLastSpan, gTree, gTreeRel, gCount
+
+' ---------- Janela sem barra de título: arrastar pela faixa azul e fechar ----------
+Dim gBX, gBY, gDrag, gDX, gDY
+
+' Ligado em <body onload>; no modo ie=9 o auto-wiring Window_OnLoad/OnResize não dispara
+Sub Init
+  Dim w, hgt, x0, y0
+  gDrag = False
+  w = Int(screen.availWidth * 0.9) : If w > 1400 Then w = 1400
+  hgt = Int(screen.availHeight * 0.9) : If hgt > 900 Then hgt = 900
+  x0 = Int((screen.availWidth - w) / 2) : y0 = Int((screen.availHeight - hgt) / 2)
+  window.resizeTo w, hgt
+  window.moveTo x0, y0
+  ' diferença entre a posição externa (moveTo) e a da área cliente (screenLeft) = borda
+  gBX = window.screenLeft - x0 : gBY = window.screenTop - y0
+  Set gLastVisual = Nothing : Set gLastSpan = Nothing : Set gTree = Nothing
+  Set window.onresize = GetRef("Layout")
+  Layout
+  RefreshSessions
+End Sub
+
+Function IsControl(el)
+  IsControl = False
+  Do While Not el Is Nothing
+    Select Case UCase(el.tagName)
+      Case "BUTTON", "SELECT", "INPUT", "OPTION", "TEXTAREA": IsControl = True : Exit Function
+      Case "BODY": Exit Function
+    End Select
+    Set el = el.parentElement
+  Loop
+End Function
+
+Sub HeaderDown
+  If window.event.button <> 1 Then Exit Sub
+  If IsControl(window.event.srcElement) Then Exit Sub
+  gDrag = True
+  gDX = window.event.screenX - (window.screenLeft - gBX)
+  gDY = window.event.screenY - (window.screenTop - gBY)
+  document.getElementById("header").setCapture
+End Sub
+
+Sub HeaderMove
+  If gDrag Then window.moveTo window.event.screenX - gDX, window.event.screenY - gDY
+End Sub
+
+Sub HeaderUp
+  If gDrag Then gDrag = False : document.getElementById("header").releaseCapture
+End Sub
+
+Sub WinClose
+  On Error Resume Next
+  If Not gLastVisual Is Nothing Then gLastVisual.Visualize False
+  window.close
+End Sub
+
+' Escala as letras pela largura da janela, depois ajusta o topo
+' do conteúdo à altura real do cabeçalho e empilha os painéis em janelas estreitas.
+Sub Layout
+  Dim w, base
+  w = document.body.clientWidth
+  base = 13 * w / 1280
+  If base < 13 Then base = 13
+  If base > 19 Then base = 19
+  document.body.style.fontSize = Round(base, 1) & "px"
+  document.getElementById("main").style.top = document.getElementById("header").offsetHeight & "px"
+  document.getElementById("main").style.bottom = document.getElementById("status").offsetHeight & "px"
+  document.getElementById("tree").style.top = document.getElementById("leftPh").offsetHeight & "px"
+  If w < 760 Then
+    document.getElementById("left").style.width = "auto"
+    document.getElementById("left").style.right = "10px"
+    document.getElementById("left").style.bottom = "52%"
+    document.getElementById("right").style.left = "10px"
+    document.getElementById("right").style.marginLeft = "0"
+    document.getElementById("right").style.top = "50%"
+  Else
+    document.getElementById("left").style.width = "48%"
+    document.getElementById("left").style.right = ""
+    document.getElementById("left").style.bottom = "10px"
+    document.getElementById("right").style.left = "48%"
+    document.getElementById("right").style.marginLeft = "20px"
+    document.getElementById("right").style.top = "10px"
+  End If
+End Sub
+
+Sub Status(msg, kind)
+  document.getElementById("status").innerText = msg
+  document.getElementById("status").className = kind
+End Sub
+
+Function GetApp()
+  Dim sapGui
+  On Error Resume Next
+  Set sapGui = GetObject("SAPGUI")
+  If Err.Number <> 0 Then
+    Status "SAP GUI não encontrado ou scripting desabilitado. Abra o SAP Logon, faça login e habilite o scripting.", "err"
+    Set GetApp = Nothing
+    Exit Function
+  End If
+  Set GetApp = sapGui.GetScriptingEngine
+End Function
+
+Sub RefreshSessions
+  Dim con, ses, opt, sel
+  Set gApp = GetApp()
+  Set sel = document.getElementById("selSes")
+  Do While sel.options.length > 0 : sel.remove 0 : Loop
+  If gApp Is Nothing Then Exit Sub
+  On Error Resume Next
+  For Each con In gApp.Children
+    For Each ses In con.Children
+      Set opt = document.createElement("option")
+      opt.value = ses.Id
+      opt.text = ses.Info.SystemName & " / " & ses.Info.Client & "  ·  " & ses.Info.Transaction & "   (" & Mid(ses.Id, 6) & ")"
+      sel.options.add opt
+    Next
+  Next
+  If sel.options.length = 0 Then
+    Status "Nenhuma sessão SAP aberta. Faça login no SAP e clique em Atualizar.", "err"
+  Else
+    Status sel.options.length & " sessão(ões) encontrada(s). Escolha uma e clique em Carregar árvore.", ""
+  End If
+End Sub
+
+Function H(s)
+  H = Replace(Replace(Replace(Replace(CStr(s), "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), """", "&quot;")
+End Function
+
+Function RelId(id)
+  Dim p, q
+  p = InStr(id, "/ses[")
+  If p = 0 Then RelId = id : Exit Function
+  q = InStr(p, id, "]/")
+  If q = 0 Then RelId = "" Else RelId = Mid(id, q + 2)
+End Function
+
+Function SafeText(obj)
+  SafeText = ""
+  On Error Resume Next
+  SafeText = obj.Text
+End Function
+
+Function Prop(obj, name)
+  Prop = ""
+  On Error Resume Next
+  Prop = CStr(Eval("obj." & name))
+End Function
+
+Function BadgeClass(tp)
+  Select Case tp
+    Case "GuiTextField", "GuiCTextField", "GuiPasswordField", "GuiOkCodeField", "GuiComboBox"
+      BadgeClass = "b-in"
+    Case "GuiButton", "GuiCheckBox", "GuiRadioButton", "GuiTab", "GuiMenu"
+      BadgeClass = "b-act"
+    Case "GuiShell", "GuiContainerShell", "GuiCustomControl", "GuiSplitterContainer"
+      BadgeClass = "b-shell"
+    Case "GuiSession", "GuiMainWindow", "GuiModalWindow", "GuiUserArea", "GuiToolbar", "GuiTitlebar", "GuiMenubar"
+      BadgeClass = "b-win"
+    Case "GuiLabel", "GuiStatusbar", "GuiBox"
+      BadgeClass = "b-lbl"
+    Case Else
+      BadgeClass = "b-oth"
+  End Select
+End Function
+
+' HTML do rótulo de um elemento (badge + nome + texto), sem <li> nem seta
+Function NodeSpan(obj)
+  Dim s, txt, nm, tp, lbl, sub1
+  On Error Resume Next
+  tp = obj.Type : nm = obj.Name
+  lbl = Mid(tp, 4)
+  If tp = "GuiShell" Then
+    sub1 = Prop(obj, "SubType")
+    If sub1 <> "" Then lbl = "Shell:" & sub1
+  End If
+  txt = SafeText(obj)
+  If Len(txt) > 45 Then txt = Left(txt, 45) & "…"
+  s = "<span class=""n"" data-id=""" & H(obj.Id) & """ data-s=""" & H(LCase(tp & " " & nm & " " & txt & " " & obj.Id)) & _
+      """ language=""vbscript"" onclick=""SelectNode Me"">" & _
+      "<span class=""b " & BadgeClass(tp) & """>" & H(lbl) & "</span><span class=""nm"">" & H(nm) & "</span>"
+  If txt <> "" Then s = s & " <span class=""tx"">" & H(txt) & "</span>"
+  NodeSpan = s & "</span>"
+End Function
+
+Sub Toggle(tg)
+  Dim ul
+  Set ul = tg.parentElement.getElementsByTagName("ul")(0)
+  If ul Is Nothing Then Exit Sub
+  If ul.style.display = "none" Then
+    ul.style.display = "" : tg.innerText = "▼"
+  Else
+    ul.style.display = "none" : tg.innerText = "►"
+  End If
+End Sub
+
+' ---------- Carregamento em blocos ----------
+' O HTA só redesenha a tela quando o script devolve o controle. Por isso a árvore é lida
+' em blocos de ~150 ms (pilha explícita, pré-ordem) e cada bloco agenda o próximo com
+' setTimeout, permitindo atualizar a barra de progresso e cancelar.
+Dim gStack(), gStackD(), gSP, gItems(), gDepth(), gN, gLoading, gCancel, gPrevPct
+Dim gKnown : Set gKnown = Nothing
+
+Sub LoadTree
+  Dim sel
+  If gLoading Then Exit Sub
+  Set sel = document.getElementById("selSes")
+  If sel.selectedIndex < 0 Then Status "Selecione uma sessão primeiro.", "err" : Exit Sub
+  If gApp Is Nothing Then Exit Sub
+  On Error Resume Next
+  If Not gLastVisual Is Nothing Then gLastVisual.Visualize False
+  Err.Clear
+  Set gSession = gApp.findById(sel.value)
+  If Err.Number <> 0 Then Status "Sessão não existe mais. Clique em Atualizar.", "err" : Exit Sub
+  On Error GoTo 0
+  Set gLastVisual = Nothing : Set gLastSpan = Nothing : Set gTree = Nothing
+
+  ReDim gStack(63) : ReDim gStackD(63) : gSP = 0
+  ReDim gItems(255) : ReDim gDepth(255) : gN = 0
+  gCancel = False : gPrevPct = 0
+  PushNode gSession, 0
+  SetLoading True
+  Status "Lendo elementos da tela…", ""
+  window.setTimeout "LoadStep", 20, "VBScript"
+End Sub
+
+Sub PushNode(obj, d)
+  If gSP > UBound(gStack) Then
+    ReDim Preserve gStack(gSP * 2) : ReDim Preserve gStackD(gSP * 2)
+  End If
+  Set gStack(gSP) = obj : gStackD(gSP) = d : gSP = gSP + 1
+End Sub
+
+Sub LoadStep
+  Dim t0, obj, d, kids, k, arr(), cnt, i
+  If gCancel Then FinishLoad False : Exit Sub
+  On Error Resume Next
+  t0 = Timer
+  Do While gSP > 0
+    If Timer - t0 > 0.15 Then Exit Do
+    gSP = gSP - 1
+    Set obj = gStack(gSP) : d = gStackD(gSP)
+    Set gStack(gSP) = Nothing
+    If gN > UBound(gItems) Then
+      ReDim Preserve gItems(gN * 2) : ReDim Preserve gDepth(gN * 2)
+    End If
+    gItems(gN) = NodeSpan(obj) : gDepth(gN) = d : gN = gN + 1
+
+    Set kids = Nothing
+    If obj.ContainerType Then Set kids = obj.Children
+    Err.Clear
+    If Not kids Is Nothing Then
+      ' empilha os filhos em ordem inversa para o primeiro sair primeiro
+      ReDim arr(kids.Count) : cnt = 0
+      For Each k In kids
+        Set arr(cnt) = k : cnt = cnt + 1
+      Next
+      For i = cnt - 1 To 0 Step -1
+        PushNode arr(i), d + 1
+      Next
+      Err.Clear
+    End If
+  Loop
+  On Error GoTo 0
+
+  If gSP > 0 Then
+    UpdateProgress
+    window.setTimeout "LoadStep", 1, "VBScript"
+  Else
+    UpdateProgress
+    FinishLoad True
+  End If
+End Sub
+
+' Total desconhecido até o fim da leitura: se a mesma tela (programa + dynpro) já foi lida,
+' usa o total anterior como referência; senão, uma curva que se aproxima de 95% sem prometer prazo.
+Function ScreenKey()
+  ScreenKey = ""
+  On Error Resume Next
+  ScreenKey = gSession.Info.Program & "/" & gSession.Info.ScreenNumber
+End Function
+
+Sub UpdateProgress
+  Dim pct, k
+  If gKnown Is Nothing Then Set gKnown = CreateObject("Scripting.Dictionary")
+  k = ScreenKey()
+  If gSP = 0 Then
+    pct = 100
+    If k <> "" Then gKnown(k) = gN
+  ElseIf gKnown.Exists(k) Then
+    pct = Int(100 * gN / gKnown(k)) : If pct > 99 Then pct = 99
+  Else
+    pct = Int(95 * (1 - Exp(-gN / 400)))
+  End If
+  If pct < gPrevPct Then pct = gPrevPct
+  gPrevPct = pct
+  document.getElementById("pfill").style.width = pct & "%"
+  document.getElementById("ptext").innerText = gN & " elementos lidos"
+End Sub
+
+Sub CancelLoad
+  gCancel = True
+  document.getElementById("ptext").innerText = "Cancelando…"
+End Sub
+
+Sub FinishLoad(ok)
+  Dim parts(), i, d, nd, j, s
+  If Not ok Then
+    ReDim gStack(0) : gSP = 0
+    SetLoading False
+    document.getElementById("tree").innerHTML = "<div class=""empty"">Carregamento cancelado.<br>Clique em <b>Carregar árvore</b> para tentar de novo.</div>"
+    document.getElementById("treeCount").innerText = ""
+    Status "Carregamento cancelado.", "err"
+    Exit Sub
+  End If
+
+  ' Monta as listas aninhadas a partir da lista em pré-ordem (item + profundidade)
+  ReDim parts(gN)
+  For i = 0 To gN - 1
+    d = gDepth(i)
+    If i < gN - 1 Then nd = gDepth(i + 1) Else nd = 0
+    If i < gN - 1 And nd > d Then
+      s = "<li><span class=""tg"" language=""vbscript"" onclick=""Toggle Me"">▼</span>" & gItems(i) & "<ul>"
+    Else
+      s = "<li><span class=""tg""></span>" & gItems(i) & "</li>"
+      For j = 1 To d - nd
+        s = s & "</ul></li>"
+      Next
+    End If
+    parts(i) = s
+  Next
+  document.getElementById("tree").innerHTML = "<ul>" & Join(parts, "") & "</ul>"
+  ReDim gItems(0) : ReDim gDepth(0)
+
+  document.getElementById("treeCount").innerText = gN & " elementos · " & gSession.Info.Transaction
+  SetLoading False
+  ClearDetails
+  ApplyFilter
+  Status "Árvore carregada: " & gN & " elementos. Clique em um elemento para destacá-lo no SAP.", "ok"
+End Sub
+
+Sub SetLoading(onOff)
+  gLoading = onOff
+  document.getElementById("btnLoad").disabled = onOff
+  document.getElementById("btnRefresh").disabled = onOff
+  document.getElementById("selSes").disabled = onOff
+  document.getElementById("txtFilter").disabled = onOff
+  If onOff Then
+    document.getElementById("btnLoad").innerText = "Carregando…"
+    document.getElementById("pfill").style.width = "0%"
+    document.getElementById("ptext").innerText = "Conectando à sessão…"
+    document.getElementById("loading").style.display = ""
+    document.body.style.cursor = "progress"
+  Else
+    document.getElementById("btnLoad").innerText = "Carregar árvore"
+    document.getElementById("loading").style.display = "none"
+    document.body.style.cursor = ""
+  End If
+End Sub
+
+Sub ClearDetails
+  document.getElementById("props").innerHTML = "<div class=""empty"">Clique em um elemento da árvore.<br>Ele fica destacado em vermelho no SAP.</div>"
+  document.getElementById("codeVbs").value = ""
+  document.getElementById("codePy").value = ""
+  document.getElementById("nodesPanel").style.display = "none"
+End Sub
+
+Sub ApplyFilter
+  Dim f, lis, li, spans, i, j, vis, nShown
+  f = LCase(Trim(document.getElementById("txtFilter").value))
+  Set lis = document.getElementById("tree").getElementsByTagName("li")
+  nShown = 0
+  For i = 0 To lis.length - 1
+    Set li = lis(i)
+    vis = (f = "")
+    If Not vis Then
+      Set spans = li.getElementsByTagName("span")
+      For j = 0 To spans.length - 1
+        If spans(j).getAttribute("data-s") <> "" Then
+          If InStr(spans(j).getAttribute("data-s"), f) > 0 Then vis = True : Exit For
+        End If
+      Next
+    End If
+    If vis Then li.style.display = "" : nShown = nShown + 1 Else li.style.display = "none"
+  Next
+  If f <> "" Then Status "Filtro """ & f & """: " & nShown & " itens visíveis (inclui os elementos-pai).", ""
+End Sub
+
+Sub SelectNode(span)
+  Dim id, obj, rows, rel
+  id = span.getAttribute("data-id")
+  If Not gLastSpan Is Nothing Then gLastSpan.className = "n"
+  span.className = "n sel" : Set gLastSpan = span
+
+  On Error Resume Next
+  If Not gLastVisual Is Nothing Then gLastVisual.Visualize False
+  Err.Clear
+  Set obj = gApp.findById(id)
+  If Err.Number <> 0 Then Status "Elemento não existe mais (a tela mudou?). Clique em Carregar árvore.", "err" : Exit Sub
+  obj.Visualize True
+  If Err.Number = 0 Then Set gLastVisual = obj Else Set gLastVisual = Nothing
+  Err.Clear
+
+  rel = RelId(id)
+  rows = Row("ID", rel) & Row("Type", obj.Type)
+  If Prop(obj, "SubType") <> "" Then rows = rows & Row("SubType", Prop(obj, "SubType"))
+  rows = rows & Row("Name", obj.Name) & Row("Text", SafeText(obj))
+  If Prop(obj, "Tooltip") <> "" Then rows = rows & Row("Tooltip", Prop(obj, "Tooltip"))
+  rows = rows & Row("Editável", Prop(obj, "Changeable")) & _
+         Row("Posição", Prop(obj, "ScreenLeft") & ", " & Prop(obj, "ScreenTop") & "  (" & Prop(obj, "Width") & " × " & Prop(obj, "Height") & ")")
+  If Prop(obj, "SubType") = "GridView" Then
+    rows = rows & Row("Linhas", Prop(obj, "RowCount")) & Row("Colunas", GridCols(obj))
+  End If
+  document.getElementById("props").innerHTML = "<table class=""kv"">" & rows & "</table>"
+  document.getElementById("codeVbs").value = CodeVbs(obj, rel)
+  document.getElementById("codePy").value = CodePy(obj, rel)
+
+  document.getElementById("nodesPanel").style.display = "none"
+  document.getElementById("treeBtns").style.display = "none"
+  Set gTree = Nothing
+  If Prop(obj, "SubType") = "Tree" Then
+    Set gTree = obj : gTreeRel = rel
+    ListTreeNodes
+  End If
+  Status "Selecionado: " & rel, ""
+End Sub
+
+Function GridCols(grid)
+  Dim i, s, cols
+  On Error Resume Next
+  Set cols = grid.ColumnOrder
+  For i = 0 To cols.Count - 1
+    If i > 0 Then s = s & ", "
+    s = s & cols(i)
+  Next
+  GridCols = s
+End Function
+
+Function Row(k, v)
+  Row = "<tr><td class=""k"">" & H(k) & "</td><td class=""v"">" & H(v) & "</td></tr>"
+End Function
+
+Function CodeVbs(obj, rel)
+  Dim f
+  f = "session.findById(""" & rel & """)"
+  Select Case obj.Type
+    Case "GuiTextField", "GuiCTextField", "GuiPasswordField", "GuiOkCodeField"
+      CodeVbs = f & ".text = ""VALOR""" & vbCrLf & f & ".setFocus"
+    Case "GuiButton"
+      CodeVbs = f & ".press"
+    Case "GuiCheckBox"
+      CodeVbs = f & ".selected = True"
+    Case "GuiRadioButton", "GuiTab", "GuiMenu"
+      CodeVbs = f & ".select"
+    Case "GuiComboBox"
+      CodeVbs = f & ".key = ""CHAVE"""
+    Case "GuiMainWindow", "GuiModalWindow"
+      CodeVbs = f & ".sendVKey 0   ' 0=Enter, 3=Voltar, 8=Executar(F8), 11=Salvar"
+    Case "GuiShell"
+      If Prop(obj, "SubType") = "GridView" Then
+        CodeVbs = "Set grid = " & f & vbCrLf & _
+                  "For i = 0 To grid.RowCount - 1" & vbCrLf & _
+                  "  valor = grid.getCellValue(i, ""COLUNA"")" & vbCrLf & "Next"
+      Else
+        CodeVbs = "' Shell " & Prop(obj, "SubType") & vbCrLf & "Set obj = " & f
+      End If
+    Case Else
+      CodeVbs = "valor = " & f & ".text"
+  End Select
+End Function
+
+Function CodePy(obj, rel)
+  Dim f
+  f = "session.findById(""" & rel & """)"
+  Select Case obj.Type
+    Case "GuiTextField", "GuiCTextField", "GuiPasswordField", "GuiOkCodeField"
+      CodePy = f & ".text = ""VALOR""" & vbCrLf & f & ".setFocus()"
+    Case "GuiButton"
+      CodePy = f & ".press()"
+    Case "GuiCheckBox"
+      CodePy = f & ".selected = True"
+    Case "GuiRadioButton", "GuiTab", "GuiMenu"
+      CodePy = f & ".select()"
+    Case "GuiComboBox"
+      CodePy = f & ".key = ""CHAVE"""
+    Case "GuiMainWindow", "GuiModalWindow"
+      CodePy = f & ".sendVKey(0)  # 0=Enter, 3=Voltar, 8=F8, 11=Salvar"
+    Case "GuiShell"
+      If Prop(obj, "SubType") = "GridView" Then
+        CodePy = "grid = " & f & vbCrLf & _
+                 "for i in range(grid.RowCount):" & vbCrLf & _
+                 "    valor = grid.getCellValue(i, ""COLUNA"")"
+      Else
+        CodePy = "obj = " & f
+      End If
+    Case Else
+      CodePy = "valor = " & f & ".text"
+  End Select
+End Function
+
+Sub CopyText(elId)
+  window.clipboardData.setData "Text", document.getElementById(elId).value
+  Status "Código copiado para a área de transferência.", "ok"
+End Sub
+
+' ---------- Árvores (GuiTree): nós não são Children, são lidos pelas chaves ----------
+Sub ListTreeNodes
+  Dim keys, k, i, s, lvl, txt, cols, c, tt, extra, folder
+  On Error Resume Next
+  tt = gTree.GetTreeType()   ' 0=simples, 1=lista, 2=colunas
+  Set keys = gTree.GetAllNodeKeys()
+  document.getElementById("nodesPanel").style.display = ""
+  If Err.Number <> 0 Or keys Is Nothing Then
+    document.getElementById("nodes").innerHTML = "<div class=""empty"">Não foi possível ler os nós.</div>"
+    Exit Sub
+  End If
+  If tt = 2 Then Set cols = gTree.GetColumnNames()
+  Dim tipos : tipos = Array("simples", "lista", "colunas")
+  document.getElementById("nodesCount").innerText = keys.Count & " nós · tipo " & tipos(tt)
+
+  s = "<table class=""nodes"">"
+  For i = 0 To keys.Count - 1
+    k = keys(i)
+    lvl = 0 : lvl = gTree.GetHierarchyLevel(k)
+    txt = "" : txt = gTree.GetNodeTextByKey(k)
+    folder = False : folder = gTree.IsFolder(k)
+    extra = ""
+    If tt = 2 Then
+      For c = 0 To cols.Count - 1
+        extra = extra & "  |  " & gTree.GetItemText(k, cols(c))
+      Next
+    End If
+    Err.Clear
+    s = s & "<tr><td><span class=""n"" style=""margin-left:" & (lvl * 16) & "px"" data-key=""" & H(k) & _
+        """ language=""vbscript"" onclick=""SelectTreeNode Me"">" & IIf(folder, "<span class=""tg"">▸</span>", "<span class=""tg"">·</span>") & _
+        H(txt) & "<span class=""tx"">" & H(extra) & "</span></span></td>" & _
+        "<td class=""key"">" & H("""" & k & """") & "</td></tr>"
+  Next
+  document.getElementById("nodes").innerHTML = s & "</table>"
+End Sub
+
+Function IIf(c, a, b)
+  If c Then IIf = a Else IIf = b
+End Function
+
+Sub SelectTreeNode(span)
+  Dim k, f
+  k = span.getAttribute("data-key")
+  On Error Resume Next
+  gTree.selectedNode = k
+  If Err.Number <> 0 Then Status "Não consegui selecionar o nó (a tela mudou?).", "err" : Exit Sub
+  If Not gLastSpan Is Nothing Then gLastSpan.className = "n"
+  span.className = "n sel" : Set gLastSpan = span
+  f = "session.findById(""" & gTreeRel & """)"
+  document.getElementById("codeVbs").value = _
+    f & ".selectedNode = """ & k & """" & vbCrLf & _
+    f & ".expandNode """ & k & """" & vbCrLf & _
+    f & ".doubleClickNode """ & k & """" & vbCrLf & _
+    "texto = " & f & ".getNodeTextByKey(""" & k & """)"
+  document.getElementById("codePy").value = _
+    f & ".selectedNode = """ & k & """" & vbCrLf & _
+    f & ".expandNode(""" & k & """)" & vbCrLf & _
+    f & ".doubleClickNode(""" & k & """)" & vbCrLf & _
+    "texto = " & f & ".getNodeTextByKey(""" & k & """)"
+  document.getElementById("treeBtns").style.display = ""
+  document.getElementById("treeBtns").setAttribute "data-key", k
+  Status "Nó selecionado: """ & k & """", ""
+End Sub
+
+Sub TreeAction(act)
+  Dim k
+  k = document.getElementById("treeBtns").getAttribute("data-key")
+  On Error Resume Next
+  Select Case act
+    Case "expand":   gTree.expandNode k
+    Case "collapse": gTree.collapseNode k
+    Case "dbl":      gTree.doubleClickNode k
+  End Select
+  If Err.Number <> 0 Then Status "Ação falhou: " & Err.Description, "err" : Exit Sub
+  If act = "dbl" Then
+    Status "Duplo clique enviado. Se a tela mudou, clique em Carregar árvore.", "ok"
+  Else
+    ListTreeNodes
+  End If
+End Sub
+</script>
+</head>
+<body language="vbscript" onload="Init">
+  <div id="header" language="vbscript" onmousedown="HeaderDown" onmousemove="HeaderMove" onmouseup="HeaderUp">
+    <span id="wc">
+      <button class="ico cls" title="Fechar" language="vbscript" onclick="WinClose">&#xE8BB;</button>
+    </span>
+    <span class="grp" id="brand">Mini Tracker SAP<small>GUI Scripting</small></span>
+    <span class="grp"><label>SESSÃO</label><select id="selSes"></select></span>
+    <span class="grp">
+      <button class="btn" id="btnRefresh" language="vbscript" onclick="RefreshSessions">↻ Atualizar</button>
+      <button class="btn btn-pri" id="btnLoad" language="vbscript" onclick="LoadTree">Carregar árvore</button>
+    </span>
+    <span class="grp"><label>FILTRO</label><input id="txtFilter" language="vbscript" onkeyup="ApplyFilter" placeholder="id, nome ou texto"></span>
+  </div>
+
+  <div id="main">
+    <div id="left">
+      <div class="panel">
+        <div class="ph" id="leftPh">Elementos da tela<span class="cnt" id="treeCount"></span></div>
+        <div id="loading" style="display:none">
+          <div class="ltitle">Carregando árvore de elementos</div>
+          <div class="pbar"><div class="pfill" id="pfill"></div></div>
+          <div class="ptext" id="ptext"></div>
+          <button class="btn btn-sm" language="vbscript" onclick="CancelLoad">Cancelar</button>
+        </div>
+        <div id="tree"><div class="empty">Abra o SAP, escolha a sessão e clique em <b>Carregar árvore</b>.</div></div>
+      </div>
+    </div>
+
+    <div id="right">
+      <div class="panel">
+        <div class="ph">Propriedades</div>
+        <div class="pb" id="props"><div class="empty">Clique em um elemento da árvore.<br>Ele fica destacado em vermelho no SAP.</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="ph">Código gerado</div>
+        <div class="pb">
+          <div class="lang">VBSCRIPT<button class="btn btn-sm" language="vbscript" onclick="CopyText 'codeVbs'">Copiar</button></div>
+          <textarea class="code" id="codeVbs" spellcheck="false"></textarea>
+          <div class="lang">PYTHON (win32com)<button class="btn btn-sm" language="vbscript" onclick="CopyText 'codePy'">Copiar</button></div>
+          <textarea class="code" id="codePy" spellcheck="false"></textarea>
+          <div id="treeBtns" style="display:none; margin-top:8px">
+            <span class="hint">Nó selecionado:</span>
+            <button class="btn btn-sm" language="vbscript" onclick="TreeAction 'expand'">Expandir</button>
+            <button class="btn btn-sm" language="vbscript" onclick="TreeAction 'collapse'">Recolher</button>
+            <button class="btn btn-sm" language="vbscript" onclick="TreeAction 'dbl'">Duplo clique</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="nodesPanel" style="display:none">
+        <div class="ph">Nós da árvore<span class="cnt" id="nodesCount"></span>
+          <span class="right"><button class="btn btn-sm" language="vbscript" onclick="ListTreeNodes">↻ Recarregar nós</button></span>
+        </div>
+        <div class="pb">
+          <div class="hint" style="margin-bottom:6px">Só aparecem nós já carregados no SAP. Pasta fechada: clique nela e use <b>Expandir</b>. A chave inclui os espaços.</div>
+          <div id="nodes"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="status">Pronto.</div>
+</body>
+</html>
